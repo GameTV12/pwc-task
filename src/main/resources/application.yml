@@ -1,0 +1,8 @@
+countries:
+  # Start file: last successfully fetched snapshot of the dataset. Loaded at
+  # startup, rewritten after every successful refresh. Lives outside the jar.
+  file: data/countries.json
+  refresh:
+    url: https://raw.githubusercontent.com/mledoze/countries/master/countries.json
+    # Fixed delay between refresh runs; the first run happens right after startup.
+    interval: 24h
