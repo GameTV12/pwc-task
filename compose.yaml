@@ -1,0 +1,11 @@
+services:
+  pwc-task:
+    build: .
+    image: pwc-task
+    container_name: pwc-task
+    ports:
+      - "8080:8080"
+    # The repo's data/ is mounted over the image's baked-in copy so the daily
+    # refresh keeps rewriting the committed start file (ADR-0001 invariant).
+    volumes:
+      - ./data:/app/data

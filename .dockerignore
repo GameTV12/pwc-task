@@ -1,0 +1,11 @@
+target/
+.git/
+.gitignore
+.gitattributes
+.idea/
+*.iml
+.vscode/
+README.md
+Dockerfile
+compose.yaml
+pwc_task_run.bat
