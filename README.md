@@ -4,6 +4,11 @@ A small Spring Boot service that calculates a land route between two countries
 using the border information from the
 [mledoze/countries](https://github.com/mledoze/countries) dataset.
 
+**Live demo:**
+<https://pwc-task.bluecoast-b3e5c09a.germanywestcentral.azurecontainerapps.io>
+— runs on Azure Container Apps; every push to `main` rebuilds and redeploys it
+via the GitHub Actions workflow in this repo.
+
 The start page of the running app, <http://localhost:8080>, is the interactive
 Swagger UI — both endpoints can be tried out directly from the browser.
 
