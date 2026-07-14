@@ -1,17 +1,12 @@
 package com.pwc.routing.api;
 
-import com.pwc.routing.data.CountriesFetcher;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.io.IOException;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -20,24 +15,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * Boots the application exactly as in production — startup data comes from
- * the committed start file — except the HTTP fetcher is stubbed to fail, so
- * no test ever touches the network and the start file is never rewritten.
+ * the committed start file — except for the {@link OfflineFetcherConfig}
+ * stub, so no test ever touches the network or rewrites the start file.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
+@Import(OfflineFetcherConfig.class)
 class RoutingApiIntegrationTest {
-
-    @TestConfiguration
-    static class OfflineFetcher {
-
-        @Bean
-        @Primary
-        CountriesFetcher failingFetcher() {
-            return () -> {
-                throw new IOException("offline in tests");
-            };
-        }
-    }
 
     @Autowired
     private MockMvc mockMvc;

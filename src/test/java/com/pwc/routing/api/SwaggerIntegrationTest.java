@@ -1,16 +1,11 @@
 package com.pwc.routing.api;
 
-import com.pwc.routing.data.CountriesFetcher;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.io.IOException;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -19,24 +14,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * Swagger is the start page: {@code /} redirects to the Swagger UI, and the
- * OpenAPI document behind it describes both REST endpoints. Offline like the
- * other integration tests.
+ * OpenAPI document behind it describes both REST endpoints. Offline via
+ * {@link OfflineFetcherConfig} like the other integration tests.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
+@Import(OfflineFetcherConfig.class)
 class SwaggerIntegrationTest {
-
-    @TestConfiguration
-    static class OfflineFetcher {
-
-        @Bean
-        @Primary
-        CountriesFetcher failingFetcher() {
-            return () -> {
-                throw new IOException("offline in tests");
-            };
-        }
-    }
 
     @Autowired
     private MockMvc mockMvc;
