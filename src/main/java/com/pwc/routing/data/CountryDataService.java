@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -38,19 +39,38 @@ public class CountryDataService {
     }
 
     /**
-     * Re-fetches the dataset. On success the start file is rewritten and the
-     * in-memory graph swapped; on any failure the last good data stays in
+     * Re-fetches the dataset. On success the in-memory graph is swapped and
+     * the start file rewritten; on any failure the last good data stays in
      * place and the next scheduled run retries.
      */
     public void refresh() {
+        String json;
+        BorderGraph fresh;
         try {
-            String json = fetcher.fetch();
-            BorderGraph fresh = BorderGraph.of(parser.parse(json));
-            Files.writeString(startFile, json);
-            graph.set(fresh);
-            log.info("Countries data refreshed, start file {} rewritten", startFile);
+            json = fetcher.fetch();
+            fresh = BorderGraph.of(parser.parse(json));
         } catch (Exception e) {
             log.warn("Countries refresh failed, keeping last good data: {}", e.toString());
+            return;
+        }
+        graph.set(fresh);
+        rewriteStartFile(json);
+    }
+
+    /**
+     * Write-then-rename so a crash mid-write can never leave a truncated
+     * start file behind — the next boot must always find a loadable snapshot.
+     * A failed rewrite only makes the file one refresh staler than memory.
+     */
+    private void rewriteStartFile(String json) {
+        try {
+            Path temp = Files.createTempFile(startFile.toAbsolutePath().getParent(), "countries", ".json.tmp");
+            Files.writeString(temp, json);
+            Files.move(temp, startFile, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+            log.info("Countries data refreshed, start file {} rewritten", startFile);
+        } catch (IOException e) {
+            log.warn("Countries data refreshed in memory, but rewriting start file {} failed: {}",
+                    startFile, e.toString());
         }
     }
 

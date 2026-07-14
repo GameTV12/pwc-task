@@ -23,15 +23,22 @@ class CountryDataServiceTest {
     @TempDir
     Path tempDir;
 
+    private Path startFile;
+
+    /** A service already loaded from a start file containing {@link #START_FILE_JSON}. */
+    private CountryDataService loadedService(CountriesFetcher fetcher) throws IOException {
+        startFile = tempDir.resolve("countries.json");
+        Files.writeString(startFile, START_FILE_JSON);
+        CountryDataService service = new CountryDataService(startFile, fetcher);
+        service.loadStartFile();
+        return service;
+    }
+
     @Test
     void startupLoadsTheStartFileAndServesRoutesFromIt() throws IOException {
-        Path startFile = tempDir.resolve("countries.json");
-        Files.writeString(startFile, START_FILE_JSON);
-        CountryDataService service = new CountryDataService(startFile, () -> {
+        CountryDataService service = loadedService(() -> {
             throw new IllegalStateException("fetcher must not be called at startup");
         });
-
-        service.loadStartFile();
 
         assertThat(service.graph().findRoute("CZE", "ITA"))
                 .isEqualTo(List.of("CZE", "AUT", "ITA"));
@@ -47,10 +54,7 @@ class CountryDataServiceTest {
                   {"cca3": "ITA", "borders": ["AUT", "CZE"]}
                 ]
                 """;
-        Path startFile = tempDir.resolve("countries.json");
-        Files.writeString(startFile, START_FILE_JSON);
-        CountryDataService service = new CountryDataService(startFile, () -> fetchedJson);
-        service.loadStartFile();
+        CountryDataService service = loadedService(() -> fetchedJson);
 
         service.refresh();
 
@@ -61,12 +65,9 @@ class CountryDataServiceTest {
 
     @Test
     void failedFetchKeepsLastGoodDataAndFile() throws IOException {
-        Path startFile = tempDir.resolve("countries.json");
-        Files.writeString(startFile, START_FILE_JSON);
-        CountryDataService service = new CountryDataService(startFile, () -> {
+        CountryDataService service = loadedService(() -> {
             throw new IOException("network down");
         });
-        service.loadStartFile();
 
         service.refresh();
 
@@ -77,10 +78,7 @@ class CountryDataServiceTest {
 
     @Test
     void malformedFetchResponseKeepsLastGoodDataAndFile() throws IOException {
-        Path startFile = tempDir.resolve("countries.json");
-        Files.writeString(startFile, START_FILE_JSON);
-        CountryDataService service = new CountryDataService(startFile, () -> "<html>not json</html>");
-        service.loadStartFile();
+        CountryDataService service = loadedService(() -> "<html>not json</html>");
 
         service.refresh();
 
