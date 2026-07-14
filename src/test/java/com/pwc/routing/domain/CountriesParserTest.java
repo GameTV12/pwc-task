@@ -11,12 +11,12 @@ class CountriesParserTest {
     private final CountriesParser parser = new CountriesParser();
 
     @Test
-    void parsesCca3AndBordersIgnoringOtherFields() {
+    void parsesCca3CommonNameAndBordersIgnoringOtherFields() {
         String json = """
                 [
-                  {"name": {"common": "Austria"}, "cca2": "AT", "cca3": "AUT",
+                  {"name": {"common": "Austria", "official": "Republic of Austria"}, "cca2": "AT", "cca3": "AUT",
                    "borders": ["CZE", "DEU", "HUN", "ITA", "LIE", "SVK", "SVN", "CHE"]},
-                  {"name": {"common": "Iceland"}, "cca2": "IS", "cca3": "ISL",
+                  {"name": {"common": "Iceland", "official": "Iceland"}, "cca2": "IS", "cca3": "ISL",
                    "borders": []}
                 ]
                 """;
@@ -24,7 +24,7 @@ class CountriesParserTest {
         List<Country> countries = parser.parse(json);
 
         assertThat(countries).containsExactly(
-                new Country("AUT", List.of("CZE", "DEU", "HUN", "ITA", "LIE", "SVK", "SVN", "CHE")),
-                new Country("ISL", List.of()));
+                new Country("AUT", "Austria", List.of("CZE", "DEU", "HUN", "ITA", "LIE", "SVK", "SVN", "CHE")),
+                new Country("ISL", "Iceland", List.of()));
     }
 }

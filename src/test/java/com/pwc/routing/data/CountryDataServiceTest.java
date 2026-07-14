@@ -1,5 +1,6 @@
 package com.pwc.routing.data;
 
+import com.pwc.routing.domain.Country;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -74,6 +75,27 @@ class CountryDataServiceTest {
         assertThat(service.graph().findRoute("CZE", "ITA"))
                 .isEqualTo(List.of("CZE", "AUT", "ITA"));
         assertThat(startFile).hasContent(START_FILE_JSON);
+    }
+
+    @Test
+    void countriesListReflectsTheCurrentDatasetAfterRefresh() throws IOException {
+        String fetchedJson = """
+                [
+                  {"name": {"common": "Czechia"}, "cca3": "CZE", "borders": ["SVK"]},
+                  {"name": {"common": "Slovakia"}, "cca3": "SVK", "borders": ["CZE"]}
+                ]
+                """;
+        CountryDataService service = loadedService(() -> fetchedJson);
+
+        assertThat(service.countries()).extracting(Country::cca3)
+                .containsExactly("CZE", "AUT", "ITA");
+
+        service.refresh();
+
+        assertThat(service.countries()).extracting(Country::cca3)
+                .containsExactly("CZE", "SVK");
+        assertThat(service.countries()).extracting(Country::name)
+                .containsExactly("Czechia", "Slovakia");
     }
 
     @Test

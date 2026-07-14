@@ -10,13 +10,18 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 class BorderGraphTest {
 
     private final BorderGraph graph = BorderGraph.of(List.of(
-            new Country("CZE", List.of("AUT", "DEU", "POL", "SVK")),
-            new Country("AUT", List.of("CZE", "DEU", "HUN", "ITA", "LIE", "SVK", "SVN", "CHE")),
-            new Country("DEU", List.of("AUT", "BEL", "CZE", "DNK", "FRA", "LUX", "NLD", "POL", "CHE")),
-            new Country("POL", List.of("BLR", "CZE", "DEU", "LTU", "RUS", "SVK", "UKR")),
-            new Country("SVK", List.of("AUT", "CZE", "HUN", "POL", "UKR")),
-            new Country("ITA", List.of("AUT", "FRA", "SMR", "SVN", "CHE", "VAT")),
-            new Country("ISL", List.of())));
+            country("CZE", List.of("AUT", "DEU", "POL", "SVK")),
+            country("AUT", List.of("CZE", "DEU", "HUN", "ITA", "LIE", "SVK", "SVN", "CHE")),
+            country("DEU", List.of("AUT", "BEL", "CZE", "DNK", "FRA", "LUX", "NLD", "POL", "CHE")),
+            country("POL", List.of("BLR", "CZE", "DEU", "LTU", "RUS", "SVK", "UKR")),
+            country("SVK", List.of("AUT", "CZE", "HUN", "POL", "UKR")),
+            country("ITA", List.of("AUT", "FRA", "SMR", "SVN", "CHE", "VAT")),
+            country("ISL", List.of())));
+
+    /** Graph routing only looks at codes and borders; names are irrelevant here. */
+    private static Country country(String cca3, List<String> borders) {
+        return new Country(cca3, cca3, borders);
+    }
 
     @Test
     void findsShortestLandRouteBetweenBorderingRegions() {
@@ -41,10 +46,10 @@ class BorderGraphTest {
     @Test
     void tieBetweenEqualLengthRoutesBreaksAlphabetically() {
         BorderGraph diamond = BorderGraph.of(List.of(
-                new Country("CZE", List.of("SVK", "AUT")),
-                new Country("SVK", List.of("CZE", "HUN")),
-                new Country("AUT", List.of("CZE", "HUN")),
-                new Country("HUN", List.of("SVK", "AUT"))));
+                country("CZE", List.of("SVK", "AUT")),
+                country("SVK", List.of("CZE", "HUN")),
+                country("AUT", List.of("CZE", "HUN")),
+                country("HUN", List.of("SVK", "AUT"))));
 
         assertThat(diamond.findRoute("CZE", "HUN"))
                 .isEqualTo(List.of("CZE", "AUT", "HUN"));

@@ -20,7 +20,8 @@ public class CountriesParser {
         try {
             List<RawCountry> raw = objectMapper.readValue(json, new TypeReference<>() {});
             return raw.stream()
-                    .map(c -> new Country(c.cca3(), c.borders() == null ? List.of() : c.borders()))
+                    .map(c -> new Country(c.cca3(), c.name() == null ? null : c.name().common(),
+                            c.borders() == null ? List.of() : c.borders()))
                     .toList();
         } catch (IOException e) {
             throw new UncheckedIOException("Malformed countries JSON", e);
@@ -28,6 +29,10 @@ public class CountriesParser {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private record RawCountry(String cca3, List<String> borders) {
+    private record RawCountry(String cca3, RawName name, List<String> borders) {
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private record RawName(String common) {
     }
 }
