@@ -102,6 +102,10 @@ Tests: unit tests on the graph/BFS logic and the data lifecycle (with a
 stubbed fetcher), plus MockMvc integration tests of the endpoint contracts —
 the whole suite runs offline.
 
+## Additional info
+
+I implemented this via Claude code and used this for skills https://github.com/mattpocock/skills
+
 ## Countries
 
 Snapshot generated from the committed `data/countries.json`. The **actual**
